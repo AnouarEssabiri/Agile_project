@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Search, Plus, SortAsc } from "lucide-react"
+import { Search, Plus, SortAsc, Check } from "lucide-react"
 import TaskCard from "@/components/ui/task-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -23,6 +23,9 @@ const filterOptions = {
   assignee: ["All", "John Doe", "Jane Smith", "Mike Johnson", "Sarah Wilson"],
 }
 
+const statusOptions = ["Backlog", "To Do", "In Progress", "In Review", "Done"];
+const assigneeOptions = ["John Doe", "Jane Smith", "Mike Johnson", "Sarah Wilson"];
+
 export default function Assignments() {
   const [tasks, setTasks] = useState(mockTasks)
   const [searchTerm, setSearchTerm] = useState("")
@@ -32,6 +35,60 @@ export default function Assignments() {
     assignee: "All",
   })
   const [sortBy, setSortBy] = useState("dueDate")
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [newTask, setNewTask] = useState({
+    title: "",
+    description: "",
+    priority: "High",
+    status: "Backlog",
+    assignee: assigneeOptions[0],
+    project: "",
+    dueDate: "",
+    tags: "",
+    comments: 0,
+    attachments: 0,
+    storyPoints: 1,
+  })
+
+  const handleNewTaskChange = (field, value) => {
+    setNewTask((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleAddTask = (e) => {
+    e.preventDefault()
+    if (!newTask.title.trim()) return
+    setTasks([
+      {
+        id: Date.now(),
+        title: newTask.title,
+        description: newTask.description,
+        priority: newTask.priority.charAt(0).toUpperCase() + newTask.priority.slice(1),
+        status: newTask.status,
+        assignee: newTask.assignee,
+        project: newTask.project,
+        dueDate: newTask.dueDate || new Date().toISOString().split("T")[0],
+        tags: newTask.tags.split(",").map(t => t.trim()).filter(Boolean),
+        comments: Number(newTask.comments) || 0,
+        attachments: Number(newTask.attachments) || 0,
+        storyPoints: Number(newTask.storyPoints) || 1,
+      },
+      ...tasks,
+    ])
+    setShowAddForm(false)
+    setNewTask({
+      title: "",
+      description: "",
+      priority: "High",
+      status: "Backlog",
+      assignee: assigneeOptions[0],
+      project: "",
+      dueDate: "",
+      tags: "",
+      comments: 0,
+      attachments: 0,
+      storyPoints: 1,
+    })
+  }
 
   const filteredTasks = tasks.filter((task) => {
     const matchesSearch =
@@ -76,36 +133,75 @@ export default function Assignments() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Assignments</h1>
           <p className="text-gray-600 dark:text-gray-400">Manage and track all your tasks</p>
         </div>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              New Task
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create New Task</DialogTitle>
-              <DialogDescription>Add a new task to your project</DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <Input placeholder="Task title" />
-              <Input placeholder="Description" />
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select priority" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="low">Low</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button className="w-full">Create Task</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-full shadow-lg flex items-center gap-2 text-base transition-all" onClick={() => setShowAddForm(true)}>
+          New Task
+          <Plus className="h-5 w-5 ml-2" />
+        </Button>
       </motion.div>
+
+      {showAddForm && (
+        <motion.form
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white dark:bg-gray-800 p-6 rounded-lg border mb-6 space-y-4 shadow"
+          onSubmit={handleAddTask}
+        >
+          <h2 className="text-xl font-bold mb-2">Add New Task</h2>
+          <Input placeholder="Task title" value={newTask.title} onChange={e => handleNewTaskChange("title", e.target.value)} />
+          <Input placeholder="Description" value={newTask.description} onChange={e => handleNewTaskChange("description", e.target.value)} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Select value={newTask.priority.toLowerCase()} onValueChange={val => handleNewTaskChange("priority", val)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="high">High</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="low">Low</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={newTask.status} onValueChange={val => handleNewTaskChange("status", val)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map(status => (
+                  <SelectItem key={status} value={status}>{status}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Select value={newTask.assignee} onValueChange={val => handleNewTaskChange("assignee", val)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select assignee" />
+              </SelectTrigger>
+              <SelectContent>
+                {assigneeOptions.map(assignee => (
+                  <SelectItem key={assignee} value={assignee}>{assignee}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Input placeholder="Project" value={newTask.project} onChange={e => handleNewTaskChange("project", e.target.value)} />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input type="date" value={newTask.dueDate} onChange={e => handleNewTaskChange("dueDate", e.target.value)} />
+            <Input placeholder="Tags (comma separated)" value={newTask.tags} onChange={e => handleNewTaskChange("tags", e.target.value)} />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Input type="number" min={0} placeholder="Comments" value={newTask.comments} onChange={e => handleNewTaskChange("comments", e.target.value)} />
+            <Input type="number" min={0} placeholder="Attachments" value={newTask.attachments} onChange={e => handleNewTaskChange("attachments", e.target.value)} />
+            <Input type="number" min={1} placeholder="Story Points" value={newTask.storyPoints} onChange={e => handleNewTaskChange("storyPoints", e.target.value)} />
+          </div>
+          <div className="flex gap-2">
+            <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white font-semibold flex-1 px-6 py-3 rounded-full shadow-lg flex items-center justify-center gap-2 text-base transition-all" disabled={!newTask.title.trim()}>
+              <Check className="h-5 w-5 mr-1" />
+              Create Task
+            </Button>
+            <Button type="button" variant="outline" className="flex-1" onClick={() => setShowAddForm(false)}>Cancel</Button>
+          </div>
+        </motion.form>
+      )}
 
       {/* Stats */}
       <motion.div

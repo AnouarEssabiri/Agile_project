@@ -9,8 +9,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { setCurrentUser } from "@/lib/auth"
-import { mockUser } from "@/lib/mock-data"
+import { useAuth } from "@/hooks/useAuth"
+import { toast } from "sonner"
 
 export default function Login() {
   const [email, setEmail] = useState("")
@@ -18,20 +18,22 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const { login } = useAuth()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
 
-    // Simulate API call
-    setTimeout(() => {
-      // Mock authentication - in real app, validate against backend
-      if (email && password) {
-        setCurrentUser(mockUser)
-        router.push("/dashboard")
-      }
+    try {
+      await login(email, password)
+      router.push("/dashboard")
+      toast.success("Successfully logged in!")
+    } catch (error) {
+      toast.error("Login failed. Please check your credentials.")
+      console.error("Login error:", error)
+    } finally {
       setLoading(false)
-    }, 1000)
+    }
   }
 
   return (
@@ -96,13 +98,9 @@ export default function Login() {
                 </Link>
               </p>
             </div>
-
-            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <p className="text-xs text-blue-700 dark:text-blue-300">Demo: Use any email and password to login</p>
-            </div>
           </CardContent>
         </Card>
       </motion.div>
     </div>
   )
-} 
+}

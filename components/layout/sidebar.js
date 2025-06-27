@@ -38,8 +38,7 @@ const menuItems = [
   { icon: Settings, label: "Settings", href: "/settings" },
 ]
 
-export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false)
+export default function Sidebar({ collapsed, setCollapsed }) {
   const pathname = usePathname()
 
   return (

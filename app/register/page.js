@@ -9,31 +9,46 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useAuth } from "@/hooks/useAuth"
+import { toast } from "sonner"
 
 export default function Register() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
-    confirmPassword: "",
-    role: "",
+    confirmPassword: ""
   })
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const { register } = useAuth()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
 
-    // Simulate API call
-    setTimeout(() => {
-      if (formData.password === formData.confirmPassword) {
-        router.push("/login")
-      }
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match")
       setLoading(false)
-    }, 1000)
+      return
+    }
+
+    try {
+      await register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        password_confirmation: formData.confirmPassword
+      })
+      router.push("/dashboard")
+      toast.success("Registration successful!")
+    } catch (error) {
+      toast.error("Registration failed. Please try again.")
+      console.error("Registration error:", error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleInputChange = (field, value) => {
@@ -80,19 +95,6 @@ export default function Register() {
                     required
                   />
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="role">Role</Label>
-                <Select onValueChange={(value) => handleInputChange("role", value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="User">User</SelectItem>
-                    <SelectItem value="Admin">Admin</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
 
               <div className="space-y-2">
@@ -152,4 +154,4 @@ export default function Register() {
       </motion.div>
     </div>
   )
-} 
+}

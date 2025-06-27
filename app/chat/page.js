@@ -83,7 +83,7 @@ export default function ChatPage() {
                 className={`w-full text-left p-3 rounded-lg flex items-center space-x-3 transition-colors ${selectedContact.id === contact.id ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
                 onClick={() => handleSelectContact(contact)}
               >
-                <Avatar>
+                <Avatar className="h-8 w-8">
                   <AvatarImage src={contact.avatar} alt={contact.name} />
                   <AvatarFallback>{contact.name.charAt(0)}</AvatarFallback>
                 </Avatar>
@@ -110,7 +110,7 @@ export default function ChatPage() {
             {/* Chat Header */}
             <div className="p-4 border-b flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <Avatar>
+                <Avatar className="h-8 w-8">
                   <AvatarImage src={selectedContact.avatar} alt={selectedContact.name} />
                   <AvatarFallback>{selectedContact.name.charAt(0)}</AvatarFallback>
                 </Avatar>

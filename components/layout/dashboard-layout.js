@@ -1,31 +1,21 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter, usePathname } from "next/navigation"
+import { useState } from "react"
+import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
 import Sidebar from "./sidebar"
 import Header from "./header"
-import { getCurrentUser } from "@/lib/auth"
+import ProtectedRoute from "@/components/auth/ProtectedRoute"
+import { useAuth } from "@/hooks/useAuth"
 
 export default function DashboardLayout({ children }) {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const router = useRouter()
+  const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
+  const { loading } = useAuth()
 
   // Pages that don't need the dashboard layout
   const publicPages = ['/login', '/register']
   const isPublicPage = publicPages.includes(pathname)
-
-  useEffect(() => {
-    const currentUser = getCurrentUser()
-    if (!currentUser && !isPublicPage) {
-      router.push("/login")
-    } else {
-      setUser(currentUser)
-    }
-    setLoading(false)
-  }, [router, isPublicPage])
 
   if (loading) {
     return (
@@ -40,24 +30,22 @@ export default function DashboardLayout({ children }) {
     return children
   }
 
-  // For authenticated pages, render with dashboard layout
-  if (!user) {
-    return null
-  }
-
+  // For authenticated pages, render with dashboard layout and protection
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Sidebar />
-      <Header />
-      <main className="ml-64 pt-20 p-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          {children}
-        </motion.div>
-      </main>
-    </div>
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+        <Header collapsed={collapsed} />
+        <main className={`${collapsed ? "ml-16" : "ml-64"} pt-20 p-6 transition-all duration-300`}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {children}
+          </motion.div>
+        </main>
+      </div>
+    </ProtectedRoute>
   )
 } 
