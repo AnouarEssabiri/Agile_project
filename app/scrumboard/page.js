@@ -187,14 +187,14 @@ export default function ScrumBoard() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0"
       >
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Scrum Board</h1>
-          <p className="text-gray-600 dark:text-gray-400">Sprint planning and task management</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Scrum Board</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Sprint planning and task management</p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button variant="outline">
+          <Button variant="outline" size="sm" className="hidden sm:flex">
             <Calendar className="h-4 w-4 mr-2" />
             Sprint Planning
           </Button>
@@ -325,90 +325,87 @@ export default function ScrumBoard() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 h-[calc(100vh-400px)]"
+        className="overflow-x-auto"
       >
-        {scrumColumns.map((column, columnIndex) => (
-          <motion.div
-            key={column.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: columnIndex * 0.1 }}
-            className="flex flex-col h-full"
-          >
-            <Card className="flex-1 flex flex-col">
-              <CardHeader className={`${column.color} rounded-t-lg`}>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm font-medium">{column.title}</CardTitle>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem onSelect={() => openAddStoryDialog(column.id)}>Add Story</DropdownMenuItem>
-                        <DropdownMenuItem
-                          onSelect={() => handleMoveAll(column.id, scrumColumns[columnIndex + 1]?.id)}
-                          disabled={!scrumColumns[columnIndex + 1]}
-                        >
-                          Move All to Next
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600" onSelect={() => handleClearColumn(column.id)}>
-                          Clear Column
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 min-w-[800px] lg:min-w-0 h-[calc(100vh-400px)]">
+          {scrumColumns.map((column, columnIndex) => (
+            <motion.div
+              key={column.id}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: columnIndex * 0.1 }}
+              className="flex flex-col h-full"
+            >
+              <Card className="flex-1 flex flex-col">
+                <CardHeader className={`${column.color} rounded-t-lg`}>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm font-medium">{column.title}</CardTitle>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem onSelect={() => openAddStoryDialog(column.id)}>Add Story</DropdownMenuItem>
+                          <DropdownMenuItem
+                            onSelect={() => handleMoveAll(column.id, scrumColumns[columnIndex + 1]?.id)}
+                            disabled={!scrumColumns[columnIndex + 1]}
+                          >
+                            Move All to Next
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-red-600" onSelect={() => handleClearColumn(column.id)}>
+                            Clear Column
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-600 dark:text-gray-400 hidden sm:block">{column.description}</span>
+                      <Badge variant="secondary" className="text-xs">
+                        {getTasksByStatus(column.id).length} ({getTotalStoryPoints(column.id)} SP)
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-600 dark:text-gray-400">{column.description}</span>
-                    <Badge variant="secondary" className="text-xs">
-                      {getTasksByStatus(column.id).length} ({getTotalStoryPoints(column.id)} SP)
-                    </Badge>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent
-                className="flex-1 p-3 space-y-2 overflow-y-auto"
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, column.id)}
-              >
-                {getTasksByStatus(column.id).map((task, taskIndex) => (
-                  <div key={task.id} draggable onDragStart={(e) => handleDragStart(e, task)} className="cursor-move">
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: taskIndex * 0.05 }}
-                    >
-                      <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border hover:shadow-md transition-shadow">
-                        <div className="space-y-2">
-                          <div className="flex items-start justify-between">
-                            <h4 className="font-medium text-sm line-clamp-2">{task.title}</h4>
-                            <Badge variant="outline" className="text-xs">
-                              {task.storyPoints || 3} SP
-                            </Badge>
-                          </div>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
-                            {task.description}
-                          </p>
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-gray-500">{task.assignee}</span>
-                            <span className="text-gray-500">{task.priority}</span>
+                </CardHeader>
+                <CardContent
+                  className="flex-1 p-3 space-y-2 overflow-y-auto"
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, column.id)}
+                >
+                  {getTasksByStatus(column.id).map((task, taskIndex) => (
+                    <div key={task.id} draggable onDragStart={(e) => handleDragStart(e, task)} className="cursor-move">
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: taskIndex * 0.05 }}
+                      >
+                        <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border hover:shadow-md transition-shadow">
+                          <div className="space-y-2">
+                            <div className="flex items-start justify-between">
+                              <h4 className="font-medium text-sm line-clamp-2">{task.title}</h4>
+                              <Badge variant="outline" className="text-xs">
+                                {task.storyPoints || 3} SP
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
+                              {task.description}
+                            </p>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-gray-500">{task.assignee}</span>
+                              <span className="text-gray-500">{task.priority}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  </div>
-                ))}
-                {getTasksByStatus(column.id).length === 0 && (
-                  <div className="text-center text-gray-500 dark:text-gray-400 py-8 text-sm">
-                    No stories
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
+                      </motion.div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
       </motion.div>
       <Dialog open={isAddStoryDialogOpen} onOpenChange={setIsAddStoryDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">

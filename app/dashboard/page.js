@@ -96,15 +96,16 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0"
       >
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Welcome back, {user?.name}! Here's what's happening with your projects.
+            Welcome back! Here's what's happening with your projects.
           </p>
         </div>
         <div className="flex items-center space-x-2">
@@ -121,7 +122,7 @@ export default function Dashboard() {
       </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         {stats.map((stat, index) => {
           const Icon = stat.icon
           return (
@@ -132,14 +133,14 @@ export default function Dashboard() {
               transition={{ delay: index * 0.1 }}
             >
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-4 lg:p-6">
                   <div className="flex items-center justify-between">
-                    <div>
+                    <div className="space-y-1">
                       <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{stat.title}</p>
-                      <p className="text-2xl font-bold">{stat.value}</p>
+                      <p className="text-xl lg:text-2xl font-bold">{stat.value}</p>
                       <p className="text-xs text-green-600 dark:text-green-400">{stat.change} from last month</p>
                     </div>
-                    <Icon className={`h-8 w-8 ${stat.color}`} />
+                    <Icon className={`h-6 w-6 lg:h-8 lg:w-8 ${stat.color}`} />
                   </div>
                 </CardContent>
               </Card>
@@ -148,7 +149,7 @@ export default function Dashboard() {
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
         {/* Active Projects */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -170,18 +171,20 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              {activeProjects.length > 0 ? (
-                activeProjects.map((project) => (
-                  <div key={project.id} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-medium">{project.name}</h4>
-                      <Badge variant="secondary">{project.status}</Badge>
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{project.description}</p>
-                    <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>Created {new Date(project.created_at).toLocaleDateString()}</span>
-                      <span>Updated {new Date(project.updated_at).toLocaleDateString()}</span>
-                    </div>
+              {activeProjects.map((project) => (
+                <div key={project.id} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium">{project.name}</h4>
+                    <Badge variant="secondary">{project.status}</Badge>
+                  </div>
+                  <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                    <span>Progress</span>
+                    <span>{project.progress}%</span>
+                  </div>
+                  <Progress value={project.progress} className="h-2" />
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span>{project.team.length} team members</span>
+                    <span>Due {new Date(project.dueDate).toLocaleDateString()}</span>
                   </div>
                 ))
               ) : (
@@ -208,7 +211,7 @@ export default function Dashboard() {
               {recentActivity.map((activity) => (
                 <div key={activity.id} className="flex items-start space-x-3">
                   <div
-                    className={`w-2 h-2 rounded-full mt-2 ${
+                    className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
                       activity.type === "completed"
                         ? "bg-green-500"
                         : activity.type === "assigned"
@@ -234,42 +237,18 @@ export default function Dashboard() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Upcoming Tasks</CardTitle>
-                <CardDescription>Tasks that need your attention</CardDescription>
-              </div>
-              <Button size="sm" variant="outline">
-                <Plus className="h-4 w-4 mr-2" />
-                New Task
-              </Button>
-            </div>
+            <CardTitle className="flex items-center space-x-2">
+              <AlertCircle className="h-5 w-5" />
+              <span>Upcoming Tasks</span>
+            </CardTitle>
+            <CardDescription>Tasks that need your attention</CardDescription>
           </CardHeader>
           <CardContent>
-            {upcomingTasks.length > 0 ? (
-              <div className="space-y-4">
-                {upcomingTasks.map((task) => (
-                  <div key={task.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex-1">
-                      <h4 className="font-medium">{task.title}</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{task.description}</p>
-                      <div className="flex items-center space-x-2 mt-2">
-                        <Badge variant="outline">{task.status}</Badge>
-                        <span className="text-xs text-gray-500">
-                          Due {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No due date'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                <CheckSquare className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                <p>No upcoming tasks</p>
-                <p className="text-sm">All caught up! Create new tasks to stay productive</p>
-              </div>
-            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {upcomingTasks.map((task) => (
+                <TaskCard key={task.id} task={task} />
+              ))}
+            </div>
           </CardContent>
         </Card>
       </motion.div>

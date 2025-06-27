@@ -38,13 +38,18 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-sm sm:max-w-md"
+      >
+        <Card className="w-full">
+          <CardHeader className="text-center space-y-2">
+            <CardTitle className="text-xl sm:text-2xl font-bold">Welcome Back</CardTitle>
             <CardDescription>Sign in to your ProjectHub account</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -58,6 +63,7 @@ export default function Login() {
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"
                     required
+                    aria-label="Email address"
                   />
                 </div>
               </div>
@@ -74,11 +80,13 @@ export default function Login() {
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10 pr-10"
                     required
+                    aria-label="Password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -93,10 +101,14 @@ export default function Login() {
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Don't have an account?{" "}
-                <Link href="/register" className="text-blue-600 hover:underline">
+                <Link href="/register" className="text-blue-600 hover:underline font-medium">
                   Sign up
                 </Link>
               </p>
+            </div>
+
+            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <p className="text-xs text-blue-700 dark:text-blue-300">Demo: Use any email and password to login</p>
             </div>
           </CardContent>
         </Card>
